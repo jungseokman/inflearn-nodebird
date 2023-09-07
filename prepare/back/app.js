@@ -8,6 +8,10 @@ const db = require("./models");
 const cors = require("cors");
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
+const passportConfig = require("./passport");
+const passport = require("passport");
+const session = require("express-session");
+const cookieParser = require("cookie-parser");
 
 const app = express();
 const PORT = process.env.PORT;
@@ -21,6 +25,16 @@ app.use(
   })
 );
 app.use(morgan("dev"));
+app.use(cookieParser("nodebirdSecret"));
+app.use(session());
+app.use(passport.initialize());
+app.use(
+  passport.session({
+    saveUninitialized: false,
+    resave: false,
+    secret: process.env.COOKIE_SECRET,
+  })
+);
 
 db.sequelize
   .sync()
@@ -28,6 +42,8 @@ db.sequelize
     console.log("db 연결 성공!");
   })
   .catch(console.error);
+
+passportConfig();
 
 // app.get -> 가져오다
 // app.post -> 생성하다.
